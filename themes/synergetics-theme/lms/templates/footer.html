@@ -1,0 +1,82 @@
+## mako
+<%page expression_filter="h"/>
+<%!
+  from django.core.urlresolvers import reverse
+  from django.utils.translation import ugettext as _
+  from branding.api import get_footer
+  from django.conf import settings
+  from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+  from openedx.core.djangoapps.micro_masters.models import Subject
+%>
+<% footer = get_footer(is_secure=is_secure) %>
+<%namespace name='static' file='static_content.html'/>
+<link href="${static.url('css/footer.css')}" rel="stylesheet">
+
+<%
+  subjects = Subject.objects.filter(mark_as_popular=True)
+%>
+
+<footer id="footer">
+  <div class="footer-top">
+      <div class="footer-container">
+          <div class="footer-row">
+                <div class="column-1">
+                    <div class="logo"><a href="/">
+                      <img src="${static.url('images/logo.png')}" alt=""></a>
+                    </div>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et lobortis diam vestibulum eget varius id, vulputate et mi. Nullam feugiat, diam quis interdum varius </p>
+                    
+                </div>
+                <div class="column-1">
+                  <h4>Categories</h4>
+                    <ul class="">
+                      % for subject in subjects[:4]:
+                        <li><a href="/courses?category=${subject}">${subject}</a></li>
+                      % endfor
+                    </ul>
+                </div>
+                <div class="column-1">
+                  <h4>Quick Links</h4>
+                    <ul>
+                      <li><a href="http://www.synergetics-india.com/" target="_blank">About</a></li>
+                      <li><a href="/contact">Contact</a></li>
+                      <li><a href="/faq">FAQs</a></li>
+                    </ul>
+                </div>
+                <div class="column-1">
+                  <h4>Contact us</h4>
+                    <div class="contact-info">
+                        <div class="contact-slide"><i class="fa fa-paper-plane"></i>C-201, MANGALYA, <br>Off Marol Maroshi Road, <br>Near Marol Fire Station, <br>Marol Naka, Marol, Andheri (East) 400 059 Maharashtra India</div>
+                        <div class="contact-slide"><i class="fa fa-phone"></i>91.22.61488900/11/23</div>
+                        <!-- <div class="contact-slide"><i class="fa fa-fax"></i>(11) 123 444 555</div> -->
+                        <div class="contact-slide">
+                          <a href="mailto:info@synergetics-india.com"><i class="fa fa-envelope-o"></i>info@gmail.com</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-container">
+          <div class="coyp-right">Copyright &copy; ${settings.COPYRIGHT_YEAR} ${settings.PLATFORM_NAME}.</div>
+
+            <div class="static-links">
+              <ul>
+                <li><a href="/privacy">Privacy Policy</a></li>
+                <li><a href="/tos">Terms of Service</a></li>
+                <li><a href="/honor">Honor Code</a></li>
+              </ul>
+            </div>
+
+            <div class="social-media">
+              <ul>
+                  <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+                    <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+                    <li><a href="#"><i class="fa fa-skype"></i></a></li>
+                    <li><a href="#"><i class="fa fa-youtube"></i></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>

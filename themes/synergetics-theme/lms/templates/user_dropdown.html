@@ -1,0 +1,95 @@
+## mako
+<%page expression_filter="h"/>
+<%namespace name='static' file='static_content.html'/>
+
+## This template should not use the target student's details when masquerading, see TNL-4895
+<%
+self.real_user = real_user if real_user != UNDEFINED else user
+%>
+
+<%!
+from django.core.urlresolvers import reverse
+from django.utils.translation import ugettext as _
+from django.conf import settings
+
+from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_image_urls_for_user
+%>
+
+<%
+    protocol = 'https://' if request.is_secure() else 'http://'
+%>
+
+% if uses_pattern_library:
+    <div class="wrapper-user-menu dropdown-menu-container logged-in js-header-user-menu">
+        <a href="${reverse('dashboard')}" class="menu-title">
+            <span class="sr-only">${_("Dashboard for:")}</span>
+            <%
+            username = self.real_user.username
+            profile_image_url = get_profile_image_urls_for_user(self.real_user)['medium']
+            %>
+            <img class="menu-image" src="${profile_image_url}" alt="">
+            ${username}
+        </a>
+        <div role="group" aria-label="User menu" class="user-menu">
+            <button type="button" class="menu-button button-more has-dropdown js-dropdown-button" aria-expanded="false" aria-controls="${_("Usermenu")}">
+                  <span class="icon fa fa-caret-down" aria-hidden="true"></span>
+                  <span class="sr-only">${_("Usermenu dropdown")}</span>
+            </button>
+            <ul class="dropdown-menu list-divided is-hidden" id="${_("Usermenu")}" tabindex="-1">
+                <%block name="navigation_dropdown_menu_links" >
+                    <li class="dropdown-item item has-block-link"><a href="${reverse('dashboard')}" role="menuitem" class="action dropdown-menuitem">${_("Dashboard")}</a></li>
+                    <li class="dropdown-item item has-block-link"><a href="${reverse('learner_profile', kwargs={'username': self.real_user.username})}" role="menuitem" class="action dropdown-menuitem">${_("Profile")}</a></li>
+                    <li class="dropdown-item item has-block-link"><a href="${reverse('account_settings')}" role="menuitem" class="action dropdown-menuitem">${_("Account")}</a></li>
+                    % if user.profile.site_manager or user.is_superuser:
+                        <li class="dropdown-item item has-block-link"><a href="${reverse('show_dashboard')}" role="menuitem" class="action dropdown-menuitem">${_("Site Administration")}</a>
+                        </li>
+                        % if user.is_superuser:
+                            <li>
+                              <a href="${protocol + settings.CMS_BASE}">
+                                <span>Go to Studio</span>
+                              </a>
+                            </li>
+                        % endif
+                    % endif
+
+                </%block>
+                <li class="dropdown-item item has-block-link"><a href="${reverse('logout')}" role="menuitem" class="action dropdown-menuitem">${_("Sign Out")}</a></li>
+            </ul>
+        </div>
+    </div>
+% else:
+    <ol class="user">
+      <li class="trophy">
+          <a href="${reverse('leaderboard')}" class="menu-title">
+          <i class="fa fa-2x fa-trophy" aria-hidden="true"></i>
+          </a>
+      </li>
+        <li class="primary">
+            <a href="javascript:void(0)" class="user-link dropdown-click">
+                <span class="sr">${_("Dashboard for:")}</span>
+                <%
+                username = self.real_user.username
+                profile_image_url = get_profile_image_urls_for_user(self.real_user)['medium']
+                %>
+                <img class="user-image-frame" src="${profile_image_url}" alt="">
+                <div class="label-username">${username}</div>
+            </a>
+        </li>
+        <li class="primary">
+            <div role="group" aria-label="User menu" class="user-menu">
+                <button class="dropdown" aria-expanded="false"><span class="sr">${_("More options dropdown")}</span><span class="fa fa-sort-desc" aria-hidden="true"></span></button>
+                <ul class="dropdown-menu" aria-label="More Options" role="menu">
+                    ${navigation_dropdown_menu_links()}
+                    <li class="item"><a href="${reverse('logout')}" role="menuitem" class="dropdown-menuitem">${_("Sign Out")}</a></li>
+                </ul>
+            </div>
+        </li>
+    </ol>
+% endif
+
+<script type="text/javascript">
+jQuery(".dropdown-click").click(function(){
+   jQuery("button.dropdown").trigger("click");
+   return false;
+});
+</script>

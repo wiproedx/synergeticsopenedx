@@ -1,0 +1,233 @@
+<%namespace name='static' file='/static_content.html'/>
+
+<%inherit file="shopping_cart_flow.html" />
+<%!
+from django.utils.translation import ugettext as _
+from django.utils.translation import ungettext
+from django.core.urlresolvers import reverse
+from markupsafe import escape
+from openedx.core.lib.courses import course_image_url
+%>
+
+<%block name="billing_details_highlight">
+
+</%block>
+
+<%block name="confirmation_highlight">class="active"</%block>
+
+<%block name="custom_content">
+<style type="text/css">
+.course-image .item-image, .image .item-image{
+    min-height: 150px;
+}
+</style>
+<div class="container">
+  <section class="wrapper confirm-enrollment shopping-cart print">
+    <div class="gray-bg">
+      <div class="message-left">
+        <% courses_url = reverse('courses') %>
+        % if receipt_has_donation_item:
+          
+          <% dashboard_url = reverse('dashboard') %>
+          <a href="${dashboard_url}" class="blue pull-right">${_("View Dashboard")} <span class="icon fa fa-caret-right" aria-hidden="true"></span></a>
+          <span class="mt-7">
+            ${_(u"You have successfully been enrolled for {course_names}. "
+                u"The following receipt has been emailed to {receipient_emails}").format(
+                  course_names=u"<b>{course_names}</b>".format(
+                    course_names=order.program.name
+                  ),
+                  receipient_emails=u"<strong>{receipient_emails}</strong>".format(
+                    receipient_emails=appended_recipient_emails
+                  ),
+            )}
+          </span>
+        % endif
+
+      </div>
+    </div>
+    <div class="bordered-bar">
+      <h2>${_('Invoice')} #${order.id}<span>${_('Date of purchase')}: ${order_purchase_date} </span><span
+          class="pull-right"><a href="" onclick="window.print();" class="blue-link"><span class="icon fa fa-print" aria-hidden="true"></span> ${_('Print Receipt')}</a></span>
+      </h2>
+    </div>
+    % if order.program.price > 0:
+      <div class="pattern">
+        <h2> ${_("Billed To Details")}: </h2>
+
+        <div class="col-two no-border">
+          
+          <div class="row">
+            <div class="row-inside">
+              <p>
+                <b class="billing-detail-label">${_('Name')}:</b>
+                <span class="billing-detail-value">
+                  % if order.bill_to_first or order.bill_to_last:
+                    ${order.bill_to_first} ${order.bill_to_last}
+                  % else:
+                    ${_('N/A')}
+                  % endif
+                </span>
+              </p>
+            </div>
+            <div class="row-inside">
+              <p>
+                <b class="billing-detail-label">${_('Address 1')}:</b>
+                <span class="billing-detail-value">
+                  % if order.bill_to_street1:
+                    ${order.bill_to_street1}
+                  % else:
+                    ${_('N/A')}
+                  % endif
+                </span>
+              </p>
+            </div>
+            <div class="row-inside">
+              <p>
+                <b class="billing-detail-label">${_('Address 2')}:</b>
+                <span class="billing-detail-value">
+                  % if order.bill_to_street2:
+                    ${order.bill_to_street2}
+                  % else:
+                    ${_('N/A')}
+                  % endif
+                </span>
+              </p>
+            </div>
+            <div class="row-inside">
+              <p>
+                <b class="billing-detail-label">${_('City')}:</b>
+                <span class="billing-detail-value">
+                  % if order.bill_to_city:
+                    ${order.bill_to_city}
+                  % else:
+                    ${_('N/A')}
+                  % endif
+                </span>
+              </p>
+            </div>
+            <div class="row-inside">
+              <p>
+                <b class="billing-detail-label">${_('State')}:</b>
+                <span class="billing-detail-value">
+                  % if order.bill_to_state:
+                    ${order.bill_to_state}
+                  % else:
+                    ${_('N/A')}
+                  % endif
+                </span>
+              </p>
+            </div>
+            <div class="row-inside">
+              <p>
+                <b class="billing-detail-label">${_('Country')}:</b>
+                <span class="billing-detail-value">
+                  % if order.bill_to_country:
+                    ${order.bill_to_country}
+                  % else:
+                    ${_('N/A')}
+                  % endif
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    % endif
+
+    % for item, course in shoppingcart_items:
+      % if loop.index > 0 :
+        <hr>
+      %endif
+      <div class="user-data">
+        <div class="clearfix">
+          <div class="image">
+            <img class="item-image" src="${course.banner_image.url}"
+                 alt="${course.name | h} ${course.name} Image"/>
+          </div>
+          <div class="data-input">
+
+            <h3 class="course-title-info" id="course-title">
+              <span class="course-registration-title">${_('Registration for:')}</span>
+              <span class="course-display-name">${ course.name | h }</span>
+            </h3>
+            <p class="course-meta-info" aria-describedby="course-title">
+              <span class="course-dates-title">
+                <%
+                    course_start_time = course.start
+                    course_end_time = course.end
+                %>
+                % if course_start_time and course_end_time:
+                  ${_("Program Dates")}:
+                % elif course_start_time or course_end_time:
+                  ${_("Program Date")}:
+                %endif
+              </span>
+              <span class="course-display-dates">
+                % if course_start_time:
+                  ${course_start_time}
+                %endif
+                % if course_end_time:
+                  -
+                  ${course_end_time}
+                %endif
+              </span>
+            </p>
+            <hr>
+            <div class="three-col">
+              % if item.status == "purchased":
+
+                <div class="col-1">
+                  % if item.discounted_price:
+                    <%
+                        total_price = item.discounted_price
+                    %>
+                    <div class="price">${_('Price:')} <span class="line-through">  ${currency_symbol}${"{0:0.2f}".format(item.item_price)}</span>
+                    </div>
+                    <div class="price green">${_('Discount Applied:')} <span>   ${currency_symbol}${"{0:0.2f}".format(item.discounted_price)} </span></div>
+                  % else:
+                    <%
+                        total_price = item.item_price
+                    %>
+                    <div class="price">${_('Total Price:')} <span>  ${currency_symbol}${"{0:0.2f}".format(item.item_price)}</span></div>
+                  % endif
+                </div>
+
+                <div class="col-2">
+                </div>
+              % elif item.status == "refunded":
+                  % if item.discounted_price:
+                    <%
+                        total_price = item.discounted_price
+                    %>
+                    <div class="price">${_('Price:')} <span class="line-through">  ${currency_symbol}${"{0:0.2f}".format(item.item_price)}</span>
+                    </div>
+                    <div class="price green">${_('Discount Applied:')} <span>   ${currency_symbol}${"{0:0.2f}".format(item.discounted_price)} </span></div>
+                  % else:
+                    <%
+                        total_price = item.item_price
+                    %>
+                    <div class="price">${_('Total Price:')} <span>  ${currency_symbol}${"{0:0.2f}".format(item.item_price)}</span></div>
+                  % endif
+                <div class="col-2">
+                </div>
+              %endif
+            </div>
+          </div>
+        </div>
+      </div>
+    % endfor
+    <div class="discount">
+      <div class="code-text">
+        % if any_refunds:
+          <span>
+          ## Translators: Please keep the "<del>" and "</del>" tags around your translation of the word "this" in your translation.
+            ${_("Note: items with strikethough like <del>this</del> have been refunded.")}
+          </span>
+        % endif
+        <span class="pull-right">${_("Total")}: <b> ${currency_symbol}${"{0:0.2f}".format(total_price)}  ${currency.upper()}</b></span>
+      </div>
+    </div>
+
+  </section>
+</div>
+</%block>

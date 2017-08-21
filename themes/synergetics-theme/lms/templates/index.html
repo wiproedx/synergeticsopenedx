@@ -1,0 +1,330 @@
+<%page expression_filter="h"/>
+<%namespace name='static' file='static_content.html'/>
+<%!
+from django.utils.translation import ugettext as _
+from django.core.urlresolvers import reverse
+from openedx.core.djangolib.markup import HTML, Text
+from course_modes.models import CourseMode
+from django.core.urlresolvers import reverse
+from django.conf import settings
+%>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Meta, title, CSS, favicons, etc. -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>${settings.PLATFORM_NAME}</title>
+    <!-- Bootstrap Core CSS -->
+    <!-- Custom CSS -->
+    
+    <link href="${static.url('css/font-awesome.css')}" rel="stylesheet">
+    <link href="${static.url('css/owl.carousel.css')}" rel="stylesheet">
+    <link href="${static.url('css/docs.css')}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i" rel="stylesheet"> 
+    
+    <!-- Custom Fonts -->
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+  <div class="page">
+      <header id="header">
+          <div class="container">
+              <div class="logo">
+                <a href="/">
+                  <img src="${static.url('images/logo.png')}" alt="">
+                </a>
+              </div>
+              <div class="login-btn">
+                <a href="/login">login / Signup</a>
+              </div>
+          </div>
+      </header>
+        <div class="banner">
+          <div class="banner-text">
+                <h2>Rich Skilling Courses</h2>
+                <p>Start ahead of peers</p>
+                <div class="search-box">
+                  <form method="get" action="/courses">
+                    <input name="search_query" placeholder="Search here" type="text">
+                    <input value="" type="submit">
+                  </form>
+                </div>
+                <a href="/courses" class="btn-style fill">Start learning now</a>
+                <div class="bottom-arrow">
+                    <a href="javascript:void(0);"><img src="${static.url('images/down-arrow.png')}" alt=""></a>
+                </div>
+            </div>
+        </div>
+        <div class="content">
+          <div class="online-program">
+                <div class="container">
+                    <h2>Choose your Competency Track</h2>
+                    <div class="row">
+                      %for course in courses[:settings.HOMEPAGE_COURSE_MAX]:
+                        <%
+                          try:
+                            price = CourseMode.min_course_price_for_currency(course.pk,settings.PAID_COURSE_REGISTRATION_CURRENCY[0])
+                          except:
+                            price = 0
+                        %>
+                        <a href="${reverse('about_course', args=[course.id.to_deprecated_string()])}">
+                          <div class="col-md-4 col-sm-6">
+                            <div class="course-box">
+                              <div class="img">
+                                  <img src="${course.course_image_url}" alt="${course.display_name_with_default} ${course.display_number_with_default}">
+                              </div>
+                              <div class="details">
+                                <div class="name">${course.display_name_with_default}</div>
+                                  <%
+                                    if course.start is not None:
+                                        course_date_string = course.start.strftime('%b %d')
+                                    else:
+                                        course_date_string = ''
+                                  %>
+                                  <p><i class="fa fa-calendar"></i>${course_date_string} onwards</p>
+                                  % if price != 0:
+                                    <div class="price">${settings.PAID_COURSE_REGISTRATION_CURRENCY[1]}${price}</div>
+                                  % else:
+                                    <div class="price">Free</div>
+                                  %endif
+                              </div>
+                            </div>
+                          </div>
+                        </a>
+                      %endfor
+                    </div>
+                </div>
+            </div>
+            <div class="online-program">
+                <div class="container">
+                    <h2>Our Programs</h2>
+                    <div class="row">
+                      %for program in programs[:settings.HOMEPAGE_COURSE_MAX]:
+                        <% price = program.price %>
+                        <a href="${reverse('program_about', args=str(program.id))}">
+                          <div class="col-md-4 col-sm-6">
+                            <div class="course-box">
+                              <div class="img">
+                                  <img src="${program.banner_image.url}" alt="${program.name}">
+                              </div>
+                              <div class="details">
+                                <div class="name">${program.name}</div>
+                                  <%
+                                    if program.start is not None:
+                                        course_date_string = program.start.strftime('%b %d')
+                                    else:
+                                        course_date_string = ''
+                                  %>
+                                  <p><i class="fa fa-calendar"></i>${course_date_string} onwards</p>
+                                  % if price != 0:
+                                    <div class="price">${settings.PAID_COURSE_REGISTRATION_CURRENCY[1]}${price}</div>
+                                  % else:
+                                    <div class="price">Free</div>
+                                  %endif
+                              </div>
+                            </div>
+                          </div>
+                        </a>
+                      %endfor
+                    </div>
+                </div>
+            </div>
+            <section class="preparation">
+                <div class="container">
+                    <div class="section-title">
+                        <h2>Maximize your preparation</h2>
+                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry</p>
+                    </div>
+                    <div class="preparation-view">
+                      <div class="row">
+                          <div class="col-sm-6">
+                              <div class="preparation-box">
+                                    <div class="icon">
+                                      <img src="${static.url('images/learn-icon.png')}" alt="">
+                                    </div>
+                                    <div class="course-name">Highest Quality Content by IIM Alumni  <span>CONTENT</span></div>
+                                    <p>Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries.</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                              <div class="preparation-box">
+                                    <div class="icon">
+                                      <img src="${static.url('images/save-timeIcon.png')}" alt="">
+                                    </div>
+                                    <div class="course-name">Detailed Analysis with Performance Indicators<span>ANALYSIS</span>
+                                    </div>
+                                    <p>Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="graph-view" style="display: none;">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-5">
+                            <div class="graph-title">climbing the Percentile Ladder</div>
+                            <img src="${static.url('images/graph-img.png')}" alt="">
+                        </div>
+                        <div class="col-sm-7">
+                            <div class="point-view">
+                                <div class="graph-point">
+                                    <i class="fa fa-area-chart"></i>
+                                    <h4>Lorem Ipsum is simply dummy text</h4>
+                                    <p>It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing.</p>
+                                </div>
+                                <div class="graph-point">
+                                    <i class="fa fa-users"></i>
+                                    <h4>Lorem Ipsum is simply dummy text</h4>
+                                    <p>It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="course-benefits">
+              <div class="container">
+                  <div class="row">
+                      % for key, val in statistical.get('fields').iteritems():
+                        % if val:
+                          <div class="col-sm-3">
+                              <div class="benefits-box">
+                                  <div class="count">${statistical.get('values').get(key)}</div>
+                                  <%
+                                    key = key.replace('_', ' ')
+                                  %>
+                                    <p>${key.title()}</p>
+                              </div>
+                          </div>
+                        % endif
+                      % endfor
+                    </div>
+                </div>
+            </div>
+            <div class="testimonials">
+              <div class="container">
+                  <h2>Our students say it best</h2>
+                    <div class="testimonials-slider">
+                      % for testimonial in testimonials:
+                        <div class="item">
+                            <img src="${testimonial.profile_image.url}" alt="${testimonial.name}">
+                            <p><i class="fa fa-quote-left"></i>${testimonial.quotes}<i class="fa fa-quote-right"></i></p>
+                              <div class="name">- ${testimonial.name}</div>
+                        </div>
+                      % endfor
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+<!-- 
+        <footer id="footer">
+          <div class="footer-top">
+              <div class="container">
+                  <div class="row">
+                        <div class="col-sm-3">
+                            <div class="logo"><a href="/">
+                              <img src="${static.url('images/logo.png')}" alt=""></a>
+                            </div>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et lobortis diam vestibulum eget varius id, vulputate et mi. Nullam feugiat, diam quis interdum varius </p>
+                            
+                        </div>
+                        <div class="col-sm-3">
+                          <h4>Popular Courses</h4>
+                            <ul class="popular">
+                              <li><a href="/about">About</a></li>
+                                <li><a href="/blog">Blog</a></li>
+                                <li><a href="/contact">Contact</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-sm-3">
+                          <h4>Quick Links</h4>
+                            <ul>
+                              <li><a href="/faq">FAQs</a></li>
+                              <li><a href="/privacy">Privacy Policy</a></li>
+                              <li><a href="/tos">Terms of Service</a></li>
+                              <li><a href="/honor">Honor Code</a></li>
+                              <li><a href="/courses">Courses</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-sm-3">
+                          <h4>Contact us</h4>
+                            <div class="contact-info">
+                                <div class="contact-slide"><i class="fa fa-paper-plane"></i>71 Pilgrim Avenue <br>Chevy Chase, MD 20815<br>USA</div>
+                                <div class="contact-slide"><i class="fa fa-phone"></i>(11) 123 456 789</div>
+                                <div class="contact-slide"><i class="fa fa-fax"></i>(11) 123 444 555</div>
+                                <div class="contact-slide">
+                                  <a href="mailto:info@gmail.com"><i class="fa fa-envelope-o"></i>info@gmail.com</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+              <div class="container">
+                  <div class="coyp-right">Copyright &copy; ${settings.COPYRIGHT_YEAR} ${settings.PLATFORM_NAME}</div>
+                    <div class="social-media">
+                      <ul>
+                          <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+                            <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+                            <li><a href="#"><i class="fa fa-skype"></i></a></li>
+                            <li><a href="#"><i class="fa fa-youtube"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </footer> 
+-->
+    <%include file="${static.get_template_path('footer.html')}" />
+        
+    </div>
+    <!-- Bootstrap Core JavaScript -->
+    <script type="text/javascript" src="${static.url('js/jquery-1.10.2.min.js')}"></script>
+    <script type="text/javascript" src="${static.url('js/owl.carousel.js')}"></script>
+    <script type="text/javascript" src="${static.url('js/owl.carousel2.thumbs.js')}"></script>
+    <script type="text/javascript">
+    var owl = $('.testimonials-slider');
+    owl.owlCarousel({
+      loop: true,
+      items: 1,
+      thumbs: true,
+      thumbImage: true,
+      thumbContainerClass: 'owl-thumbs',
+      thumbItemClass: 'owl-thumb-item'
+    });
+    $('.member-viewSlider').owlCarousel({
+      loop: true,
+      items: 1,
+    });
+
+    $(".bottom-arrow a").on("click",function() {
+      $("html, body").animate({ scrollTop: $(".online-program").offset().top + "px" }, 1000);
+    });
+
+    $(window).scroll(function(){
+      var top_value = $(".banner").offset().top;
+      if($(window).scrollTop() > top_value) 
+      {
+        $("#header").addClass("fiexd");
+      }
+      else
+      {
+        $("#header").removeClass("fiexd");
+      }
+    });
+  </script>
+</body>
+</html>
+
